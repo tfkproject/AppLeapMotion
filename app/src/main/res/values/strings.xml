@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AppLeapMotion</string>
+    <string name="speech_prompt">Katakan sesuatu&#8230;</string>
+    <string name="speech_not_supported">Maaf! Perangkat ini tidak mendukung speech input</string>
+</resources>
