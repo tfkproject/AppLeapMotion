@@ -1,5 +1,6 @@
 package ilham.ta.appleapmotion;
 
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -31,7 +32,10 @@ public class MainActivity extends AppCompatActivity implements
     private ImageView btnToa, btnMic;
     private final int REQ_CODE_SPEECH_INPUT = 100;
 
-    private static String url = Config.HOST+"lihat_data.php";
+    private ProgressDialog pDialog;
+
+    private static String url_get = Config.HOST+"lihat_data.php";
+    private static String url_post = Config.HOST+"post_data.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     String text = result.get(0);
                     Toast.makeText(this, ""+text, Toast.LENGTH_SHORT).show();
+
+                    new postData(text).execute();
 
                 }
                 break;
@@ -153,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements
                     //convert this HashMap to encodedUrl to send to php file
                     String dataToSend = hashMapToUrl(detail);
                     //make a Http request and send data to php file
-                    String response = Request.post(url, dataToSend);
+                    String response = Request.post(url_get, dataToSend);
 
                     //dapatkan respon
                     Log.e("Respon", response);
@@ -195,6 +201,83 @@ public class MainActivity extends AppCompatActivity implements
             //adapter.notifyDataSetChanged();
             //pDialog.dismiss();
             tts.speak(huruf, TextToSpeech.QUEUE_FLUSH, null);
+        }
+
+    }
+
+    public class postData extends AsyncTask<Void,Void,String> {
+
+        //variabel untuk tangkap data
+        private int scs = 0;
+        private String huruf, psn, sebut;
+
+        public postData(String sebut){
+            this.sebut = sebut;
+        }
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(MainActivity.this);
+            pDialog.setMessage("Loading...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        protected String doInBackground(Void... params) {
+
+            try{
+                //susun parameter
+                HashMap<String,String> detail = new HashMap<>();
+                detail.put("sebut", sebut);
+
+                try {
+                    //convert this HashMap to encodedUrl to send to php file
+                    String dataToSend = hashMapToUrl(detail);
+                    //make a Http request and send data to php file
+                    String response = Request.post(url_post, dataToSend);
+
+                    //dapatkan respon
+                    Log.e("Respon", response);
+
+                    JSONObject ob = new JSONObject(response);
+                    scs = ob.getInt("success");
+
+                    if (scs == 1) {
+                        /*JSONArray products = ob.getJSONArray("field");
+
+                        for (int i = 0; i < products.length(); i++) {
+                            JSONObject c = products.getJSONObject(i);
+
+                            // Storing each json item in variable
+                            String id_data = c.getString("id_data");
+                            huruf = c.getString("huruf");
+                            String time = c.getString("timestamp");
+
+
+                        }*/
+                    } else {
+                        // no data found
+                        //psn = ob.getString("message");
+                    }
+
+                } catch (JSONException e){
+                    e.printStackTrace();
+                }
+
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            //adapter.notifyDataSetChanged();
+            pDialog.dismiss();
         }
 
     }

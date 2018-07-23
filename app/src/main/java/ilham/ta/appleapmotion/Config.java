@@ -6,5 +6,5 @@ package ilham.ta.appleapmotion;
 
 public class Config {
     //link server
-    public static final String HOST = "http://192.168.43.230/pkm/";
+    public static final String HOST = "http://203.153.21.11/app/sibi-ilham/api/";
 }
